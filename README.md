@@ -8,8 +8,7 @@ Projetos desenvolvidos no Arduino Meetup
     5V  -      5V
     GND -     GND
     RST -     RST
-    INT - Pino  2
     SCK - Pino 13
     SO  - Pino 12
     SI  - Pino 11
-    CS  - Pino  8
+    CS  - Pino 10

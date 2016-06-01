@@ -8,8 +8,8 @@
 // Tempo de estabilizacao
 #define DEBOUNCE_DELAY 50
 
-// Registro de um minuto para apagar o LCD
-const unsigned long oneMinute = 60 * 1000;
+// Registro de 10 segundos para apagar o LCD
+const unsigned long timeClearLCD = 10 * 1000;
 
 // Leitura da campainha
 int campainhaReading;
@@ -33,7 +33,7 @@ char emailDestinatario[] = "seu_email com arroba e tudo mais";
 // Configure o assunto do e-mail que você quer receber
 char emailAssunto[] = "Subject: Campainha de casa";
 // Configure o conteúdo da mensagem do e-mail
-char emailConteudo[] = "Alguém acaba de tocar a campainha!";
+char emailConteudo[] = "Alguem acaba de tocar a campainha!";
 
 // LCD do Blynk (Setar no aplicativo como V1)
 WidgetLCD lcd(V1);
@@ -47,9 +47,12 @@ void setup()
   pinMode(CAMPAINHA_PIN, INPUT_PULLUP);
 
   Serial.begin(9600);
+
   Blynk.begin(auth);
 
-  while (!Blynk.connect())
+  while (!Blynk.connect());
+
+  lcd.clear();
 }
 
 void notifyLCD() {
@@ -57,12 +60,12 @@ void notifyLCD() {
   lcd.clear();
 
   // use: (position X: 0-15, position Y: 0-1, "Message you want to print")
-  lcd.print(4, 0, F("Atenda"));
-  lcd.print(4, 1, F("a porta."));
+  lcd.print(4, 0, "Atenda");
+  lcd.print(4, 1, "a porta.");
 }
 
 void notifyPushNotification() {
-  Blynk.notify(F("Alguém acaba de tocar a camapinha de CASA!"));
+  Blynk.notify("Alguém acaba de tocar a camapinha de CASA!");
 }
 
 void notifyEmail() {
@@ -101,7 +104,7 @@ void loop() {
   campainhaReading = digitalRead(CAMPAINHA_PIN);
 
   // Se o estado do botão mudou seja por pressionamento ou ruido
-  if (campainhaReading != lastButtonState) {
+  if (campainhaReading != lastCampainhaState) {
     // Reseta o temporizador de debounce
     lastDebounceCampainhaTime = millis();
   }
@@ -111,12 +114,14 @@ void loop() {
     if (campainhaReading != campainhaState) {
       campainhaState = campainhaReading;
 
-      // Realiza a notificação
-      notify();
+      if (campainhaState == LOW) {
+        // Realiza a notificação
+        notify();
+      }
     }
   }
 
-  if ((millis() - lastDebounceCampainhaTime) > oneMinute) {
+  if ((millis() - lastDebounceCampainhaTime) > timeClearLCD) {
     if (clearLCD) {
       apagarLCD();
     }
